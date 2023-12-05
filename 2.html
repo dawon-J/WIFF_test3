@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://use.typekit.net/pes2dcd.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <title>Enjoy your WIFF!</title>
+    <style type="text/css">
+      body {
+        font-family: "shader-inline", monospace;
+        font-weight: 100;
+        font-style: normal;
+        transition: background-color 0.5s;
+        position: relative;
+        overflow: hidden;
+        background-color: black;
+        color: white;
+      }
+
+      body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 350px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+  z-index: -1;
+}
+
+body.webcam-active::before {
+  z-index: 1; /* 웹캠이 활성화된 경우 더 높은 z-index를 설정합니다. */
+}
+
+      nav {
+        margin-bottom: 100px;
+      }
+
+      .container {
+        margin-bottom: 70px;
+        position: relative;
+        z-index: 1; /* 텍스트 요소들의 z-index 설정 */
+      }
+
+      .firework-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0px;
+        width: 240px;
+      }
+
+      a {
+        text-decoration: none;
+        cursor: pointer;
+        color: inherit;
+      }
+
+      a:hover { 
+        color: lightgoldenrodyellow;
+        transitoin: color 0.3s ease;
+      }
+
+      .logo {
+        font-size: 2rem;
+        z-index: 9999;
+        position: relative;
+      }
+
+      button {
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+      }
+
+      .active-button {
+        background-color: red !important;
+      }
+
+      h4 {
+        margin-top: 0px;
+        margin-bottom: 13px;
+      }
+
+      h5 {
+        font-size: 1rem;
+        font-family: sans-serif;
+        font-weight: 300;
+        margin:0;
+        padding-bottom:20px;
+      }
+
+      h6 {
+        font-size: 0.8rem;
+        font-family: sans-serif;
+        font-weight: 100;
+        margin:0;
+        padding-bottom:20px;
+      }
+
+
+      .color-picker,
+      .firework,
+      .retry-button,
+      .save-button {
+        pointer-events: none;
+        z-index: 2; /* 다른 요소들의 z-index 설정 */
+      }
+
+      .color-picker,
+      #webcam.active,
+      .firework,
+      .retry-button,
+      .save-button {
+        pointer-events: auto;
+      }
+
+      .color-picker {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border-radius: 0px;
+        cursor: pointer;
+        background-color: white !important;
+        color: white;
+        z-index: 9999;
+        position: relative;
+      }
+
+      .apply-button,
+      .retry-button,
+      .save-button {
+        background-color: #000000;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+
+      #webcam {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: none;
+        transform: scaleX(-1);
+        z-index: -9999;
+        opacity: 0;
+        transition: all 0.5s ease;  
+      }
+      #webcam:hover {
+        background-color: red !important;
+        transition: background-color 0.3s ease;
+      }
+      #webcam.active {
+        display: block;
+        opacity: 1;
+        transition: all 0.5s ease; transform 0.5s ease;
+      }
+
+      .Camera:hover {
+        background-color: red !important;
+        transition: background-color 0.3s ease;
+      }
+
+      .square.active {
+        display: inline-block;
+      }
+
+      .square.active:hover {
+  background-color: red !important;
+  transition: background-color 0.1s ease;
+}
+
+      .firework {
+        display: block;
+        background-color: black;
+        border: 0.5px solid #999999;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        padding: 0px 0px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        touch-action: manipulation;
+        user-select: none;
+        cursor: pointer;
+        z-index: 9999;
+        position: relative;
+        transition: background-color 0.3s ease;
+      }
+
+      .firework:hover,
+      .firework.clicked {
+        background-color: lightgray;
+      }
+
+      .retry-button,
+      .save-button,
+      .Camera {
+        padding: 3px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        touch-action: manipulation;
+        user-select: none;
+        background-color: lightgray;
+        border: 1px solid #999999;
+        border-radius: 4px;
+        z-index: 9999;
+        cursor: pointer;
+        position: relative;
+        color: black;
+      }
+
+      .square {
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  display: inline-block; /* 초기에는 표시 */
+  opacity: 0; /* 초기에는 불투명도 0 */
+  margin-left: 5px;
+  transition: opacity 0.3s ease; /* 트랜지션 효과 추가 */;
+}
+
+.webcam-container.active .square {
+  opacity: 1; /* webcam이 활성화되면 불투명도를 1로 조절하여 나타나게 함 */
+}
+      .webcam-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .contact {
+        position: fixed;
+         top: 78%;
+        color: white;
+      }
+
+      .credit {
+  position: fixed;
+  top: 93%;
+  transform: translate(0, -50%);
+  color: lightslategray;
+}
+
+    </style>
+  </head>
+
+  <body>
+    <nav>
+      <div class="nav_wrapper">
+        <div class="logo">
+          <a href="index.html">WIFF</a>
+        </div>
+        <div class="nav_space"></div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h3>Background<br />Option</h3>
+      <input type="color" class="color-picker" id="colorPicker" oninput="applyBackgroundColor()" />
+      <h4>or</h4>
+      <div class="webcam-container">
+        <button class="Camera" onclick="toggleWebcam()">Webcam</button>
+        <div class="square"></div>
+      </div>
+      <video id="webcam" autoplay playsinline></video>
+
+      <h3>Pick<br />a Flame</h3>
+      <!-- 각 이미지를 감싸는 div를 추가하고, 이를 .firework-container로 감싼다. -->
+      <div class="firework-container">
+        <div><img src="1.png" height="70" class="firework" onclick="onClick(1)" /></div>
+        <div><img src="2.png" height="70" class="firework" onclick="onClick(2)" /></div>
+        <div><img src="3.png" height="70" class="firework" onclick="onClick(3)" /></div>
+        <div><img src="4.png" height="70" class="firework" onclick="onClick(4)" /></div>
+        <div><img src="5.png" height="70" class="firework" onclick="onClick(5)" /></div>
+        <div><img src="6.png" height="70" class="firework" onclick="onClick(6)" /></div>
+      </div>
+      <h3>And Click Anywhere<br />in The WEB SKY!</h3>
+      <button class="retry-button" onclick="retry()">Retry</button>
+      <button class="save-button" onclick="save()">Save Your Own WIFF!</button>
+      <div class = "credit">
+        <h5>
+          ⓒ 2023. DELIEF ALL RIGHTS RESERVED.
+        </h5>
+        <h6> 
+          Seoul National University of Science and Technology<br>
+          Visual Communication Design Program<br>
+          Web Interaction Design Final Project<br>
+        </h6>
+      </div>
+      
+      <div class = "contact">
+        <h4>
+          Contact
+        </h4>
+        <h5>
+         <a href="https://www.instagram.com/fol.da_" target="_blank" class="folda">
+          @fol.da_
+        </a>
+        < Click to See My Work Accont!
+        </h5>
+      </div>
+
+
+    <script>
+      var isClicked = false;
+      var fireworkType;
+      var number = 0;
+
+      function applyBackgroundColor() {
+        var colorPicker = document.getElementById("colorPicker");
+        var selectedColor = colorPicker.value;
+        document.body.style.backgroundImage = ""; // 배경 이미지 제거
+        document.body.style.backgroundColor = selectedColor;
+
+        adjustTextColor();
+      }
+
+    
+      var isWebcamActive = false; // 웹캠 활성화 여부를 저장하는 변수 추가
+
+      window.toggleWebcam = function () {
+        const webcam = document.getElementById("webcam");
+        const cameraButton = document.querySelector(".Camera");
+        const square = document.querySelector(".square");
+
+        if (!isWebcamActive) {
+          // 활성화될 때
+          webcam.style.display = "block";
+          webcam.classList.add("active");
+          cameraButton.classList.add("active-button");
+          square.classList.add("active");
+          square.interval = setInterval(function () {
+            square.style.opacity = square.style.opacity === "0" ? "1" : "0";
+          }, 500);
+        } else {
+          // 비활성화될 때
+          webcam.style.display = "none";
+          webcam.classList.remove("active");
+          cameraButton.classList.remove("active-button");
+          square.classList.remove("active");
+
+          clearInterval(square.interval);
+          square.style.opacity = "0";
+        }
+
+        // 상태 변경
+        isWebcamActive = !isWebcamActive;
+      };
+
+      // 초기 웹캠 상태 설정은 로드된 후 한 번만 실행
+      window.addEventListener("load", function () {
+        const webcam = document.getElementById("webcam");
+        const cameraButton = document.querySelector(".Camera");
+
+        // 웹캠 스트림 가져오기
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            webcam.srcObject = stream;
+            webcam.setAttribute("autoplay", true);
+            webcam.setAttribute("playsinline", true);
+          })
+          .catch((error) => {
+            console.error("웹캠 접근 오류:", error);
+          });
+      });
+
+      // DOMContentLoaded 이벤트에서 초기 웹캠 상태 설정만 수행
+      document.addEventListener("DOMContentLoaded", function () {
+        // 여기에 초기 설정 코드를 두지 않습니다.
+      });
+
+      function onClick(type) {
+        fireworkType = type;
+        isClicked = true;
+        var clickedElement = document.querySelector(".firework-container > div:nth-child(" + type + ") > img");
+        var fireworkContainers = document.querySelectorAll(".firework-container > div");
+
+        clickedElement.style.backgroundColor = "lightGrey";
+
+        fireworkContainers.forEach(function (container) {
+          var otherElement = container.querySelector("img");
+          if (otherElement !== clickedElement) {
+            otherElement.style.backgroundColor = "";
+          }
+        });
+      }
+
+      document.addEventListener("click", function (event) {
+  var fireworkContainers = document.querySelectorAll(".firework-container > div");
+  var clickedElementClasses = event.target.classList;
+  var nonFireworkClasses = ["color-picker", "upload", "firework", "retry-button", "save-button", "Camera"]; // Webcam 버튼 추가
+
+  if (isClicked && !nonFireworkClasses.some((cls) => clickedElementClasses.contains(cls))) {
+   
+      number = (number % 5) + 1;
+          document.body.style.cursor = "url('cursor.png'), pointer";
+          var fireworkImage = document.createElement("img");
+          fireworkImage.src = "type" + fireworkType + "_" + number + ".gif";
+          fireworkImage.alt = "type" + fireworkType + "_" + number;
+          fireworkImage.style.position = "absolute";
+
+          var randomScale = Math.floor(Math.random() * 61) + 50; // 50부터 110 사이의 값을 생성
+          fireworkImage.style.transform = "translate(-50%, -50%) scale(" + randomScale / 100 + ")";
+
+          fireworkImage.style.left = event.pageX + "px";
+          fireworkImage.style.top = event.pageY + "px";
+          fireworkImage.classList.add("firework-image"); // 클래스 추가
+          document.body.appendChild(fireworkImage);
+          number++;
+
+          // 이미지 배경색 초기화
+          fireworkContainers.forEach(function (container) {
+            var fireworkImg = container.querySelector("img");
+            if (fireworkImg) {
+              fireworkImg.style.backgroundColor = "";
+            }
+          });
+        }
+      });
+
+
+      function retry() {
+        var previousFireworks = document.querySelectorAll(".firework-image");
+        previousFireworks.forEach(function (firework) {
+          firework.remove();
+        });
+      }
+
+      function save() {
+        // Create a temporary canvas to draw the content
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+
+        // Set canvas size to match the document body
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Draw the current content to the canvas
+        html2canvas(document.body, { useCORS: true }).then(function (canvas) {
+          // Convert canvas content to data URL
+          var dataURL = canvas.toDataURL("image/png");
+
+          // Create a temporary link element
+          var link = document.createElement("a");
+          link.href = dataURL;
+          link.download = "your_wiff_image.png";
+
+          // Trigger a click event to prompt the user to download the image
+          document.body.appendChild(link);
+          link.click();
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://use.typekit.net/pes2dcd.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
+    <title>WIFF: Web International Firework Festival</title>
+    <style type="text/css">
+        body {
+            background: url('firework1.gif') no-repeat center center fixed;
+            background-size: cover;
+            margin: auto;
+            padding-left: 100px;
+			padding-right: 100px;
+            font-family: "shader-inline", monospace;
+            font-weight: 100;
+            font-style: normal;
+            background-color: #000000; /* 배경색 추가 */
+        }
+        h1 {
+            padding-top: 8rem;
+            font-size: 8rem;
+            padding-bottom: 0px;
+            margin-block-end: 0.3rem;
+            margin-block-start: 0;
+            letter-spacing: -10px;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-top: 0rem;
+			color: #999999;
+        }
+        p {
+            font-size: 1.2rem;
+			font-family: sans-serif;
+			font-weight: 100;
+			color: #222222;
+        }
+        .WIFF {
+            color: white;
+        }
+
+        .circle-label {
+    border: 1px solid white;
+    border-radius: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    background-color: transparent;
+    font-size: 2rem;
+    color: white;
+    font-family: "shader-inline", monospace;
+    font-weight: 100;
+    font-style: normal;
+    position: fixed;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s, color 0.15s;
+    top: 46%; /* 조절 가능한 상대적인 위치값 */
+}
+        .circle-label:hover {
+            background-color: Lightgray; /* 마우스 호버 시 배경색을 흰색으로 변경 */
+    		color: black; /* 글자 색상을 검은색으로 변경 */
+        }
+        .intro-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            right: 50%;
+            left: 50%;
+            background-color: Lightgray;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 10px;
+            z-index: 998;
+            width: 1100px;
+            height: 300px;
+            border: 1.5px solid white;
+            transform: translate(-50%, -50%);
+            text-align: center;
+			opacity: 1; /* 초기에는 투명도를 1로 설정 */
+            transition: opacity 0.3s ease; /* 투명도 변화에 트랜지션 적용 */
+    
+        }
+
+        .intro-container h2 {
+            padding-bottom: 1rem;
+        }
+        .intro-container p {
+            margin: 1rem;
+        }
+
+		.overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); /* 검은색 배경에 80%의 투명도 */
+            z-index: 997; /* 팝업 미만의 z-index 값 설정 */
+            display: none; /* 초기에는 안 보이도록 설정 */
+        }
+
+		#go {
+			top: 60%;
+			border: 1px solid white;
+			border-radius: 10px;
+			padding-top: 20px;
+			padding-bottom: 20px;
+			padding-left: 30px;
+			padding-right: 30px;
+    		background-color: transparent;
+			font-size: 2rem;
+			color: white;
+			font-family: "shader-inline", monospace;
+            font-weight: 100;
+            font-style: normal;
+            position: absolute;
+			cursor: pointer;
+			text-align: left;
+			transition: background-color 0.15s, color 0.15s;
+		}
+    </style>
+</head>
+
+<body>
+
+    <div class="WIFF">
+        <h1>WIFF</h1>
+        <h2>Web * International * FIrework * Festival</h2>
+    </div>
+
+    <div class="circle-label">Click to Enter!</div>
+	
+
+    <div class="intro-container" id="introContainer">
+        <div class="intro">
+            <h2>Web * International * FIrework * Festival</h2>
+            <p>세계 웹 불꽃축제, WIFF에 방문하신 여러분들을 환영합니다!</p>
+            <p>인파가 몰리는 곳에 가기 힘들어서 불꽃축제 방문을 꺼리셨던 경험이 있으신가요?</p>
+            <p>WIFF는 그런 여러분들을 위해 개최되었습니다.</p>
+            <p>지금 바로, 방구석 불꽃 축제를 즐겨 보세요!</p>
+            <button id="enterButton">START!</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var circleLabel = document.querySelector(".circle-label");
+            var introContainer = document.getElementById("introContainer");
+
+            // 팝업 토글 이벤트 핸들러
+            function togglePopup() {
+                if (introContainer.style.display === "block") {
+                    introContainer.style.display = "none";
+                } else {
+                    introContainer.style.display = "block";
+                }
+            }
+
+            circleLabel.addEventListener("click", togglePopup);
+
+            // 팝업 외부를 클릭하면 팝업이 사라지도록 이벤트 추가
+            document.addEventListener("click", function closePopupOutside(e) {
+                if (!introContainer.contains(e.target) && !circleLabel.contains(e.target)) {
+                    introContainer.style.display = "none";
+                    document.removeEventListener("click", closePopupOutside);
+                }
+            });
+
+            // "Enter" 버튼 클릭 시 페이지 이동
+            var enterButton = document.getElementById("enterButton");
+            enterButton.addEventListener("click", function () {
+                window.location.href = "2.html"; // 이동할 페이지의 URL로 변경
+            });
+        });
+    </script>
+
+</body>
+
+</html>
